@@ -16,6 +16,11 @@ dependencies {
     implementation 'org.springframework:spring-context-support:5.3.9'
 
     testImplementation 'org.springframework:spring-test:5.3.9'
+
+    // SLF4J 적용
+    // cf. SLF4J는 추상 로깅 프레임워크이기 때문에 단독으로는 로깅을 할 수가 없음.
+    // 보통은 네이티브 구현체인 Logback이나 Log4J와 같은 구현체를 이용해서 사용.
+    implementation 'ch.qos.logback:logback-classic:1.2.3'
 }
 
 java {
