@@ -1,5 +1,6 @@
 package moviebuddy;
 
+import moviebuddy.domain.CsvMovieReader;
 import moviebuddy.domain.Movie;
 import moviebuddy.domain.MovieFinder;
 
@@ -20,7 +21,6 @@ import java.util.stream.Stream;
  * @author springrunner.kr@gmail.com
  */
 public class MovieBuddyApplication {
-    final MovieFinder movieFinder = new MovieFinder();
 
     public static void main(String[] args) throws Exception {
         new MovieBuddyApplication().run(args);
@@ -36,6 +36,9 @@ public class MovieBuddyApplication {
      */
 
     public void run(String[] args) throws Exception {
+        final MovieBuddyFactory movieBuddyFactory = new MovieBuddyFactory();
+        final MovieFinder movieFinder = movieBuddyFactory.movieFinder();
+
         final AtomicBoolean running = new AtomicBoolean(true);
         final BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         final PrintWriter output = new PrintWriter(System.out, false);
