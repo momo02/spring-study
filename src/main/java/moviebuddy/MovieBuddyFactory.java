@@ -1,8 +1,10 @@
 package moviebuddy;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 /**
  * @Configuration 어노테이션을 붙임으로,
@@ -15,6 +17,14 @@ import org.springframework.context.annotation.Import;
 @ComponentScan(basePackages = { "moviebuddy" })
 @Import({ MovieBuddyFactory.DomainModuleConfig.class, MovieBuddyFactory.DataSourceModuleConfig.class })
 public class MovieBuddyFactory {
+
+    @Bean  // Jaxb2Marshaller : JAXB를 이용해 마샬링,언마샬링을 해주는 스프링의 OXM 모듈 구현체
+    public Jaxb2Marshaller jaxb2Marshaller() {
+        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+        // 스프링의 자동 클래스 탐지와 유사하게 지정된 패키지에서 XML을 자바 객체로 변환 시 사용할 클래스를 찾아서 사용을 할 수 있음.
+        marshaller.setPackagesToScan("moviebuddy");
+        return marshaller;
+    }
 
     @Configuration
     static class DomainModuleConfig {
