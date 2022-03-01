@@ -1,6 +1,6 @@
 package moviebuddy.domain;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,7 +13,7 @@ public class MovieFinder {
 
     // @Autowired 어노테이션을 이용해 의존 관계 주입을 자동으로 받을 수 있도록 설정.
     // @Autowired  // 생성자가 하나뿐이라면 생략 가능.
-    public MovieFinder(MovieReader movieReader){
+    public MovieFinder(@Qualifier("csvMovieReader") MovieReader movieReader){
         this.movieReader = Objects.requireNonNull(movieReader);
     }
     // 기본적으론 선언되어 있는 타입(MovieReader)을 기반으로 의존 관계 주입 대상을 찾는다.
