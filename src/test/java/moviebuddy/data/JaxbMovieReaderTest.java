@@ -1,6 +1,7 @@
-package moviebuddy.domain;
+package moviebuddy.data;
 
 import moviebuddy.MovieBuddyFactory;
+import moviebuddy.domain.Movie;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,8 @@ import java.util.List;
 @SpringJUnitConfig(MovieBuddyFactory.class)
 public class JaxbMovieReaderTest {
 
-    @Autowired JaxbMovieReader movieReader;
+    @Autowired
+    JaxbMovieReader movieReader;
 
     @Test
     void NotEmpty_LoadedMovies() {
