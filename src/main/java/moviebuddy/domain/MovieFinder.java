@@ -16,6 +16,8 @@ public class MovieFinder {
     public MovieFinder(MovieReader movieReader){
         this.movieReader = Objects.requireNonNull(movieReader);
     }
+    // 기본적으론 선언되어 있는 타입(MovieReader)을 기반으로 의존 관계 주입 대상을 찾는다.
+    // 만약 MovieReader 타입의 빈이 2개 이상 존재할 경우엔, 지정한 변수명(movieReader)과 동일한 빈 이름으로 찾는다.
 
     /**
      * 저장된 영화 목록에서 감독으로 영화를 검색한다.
