@@ -37,7 +37,9 @@ public class MovieBuddyApplication {
      */
 
     public void run(String[] args) throws Exception {
-        // annotation을 이용해 빈 구성정보를 읽어 application context를 구성.
+        // annotation을 이용해 빈 구성정보를 읽어 application context를 구성하기 위
+        // 구현체로 AnnotationConfigApplicationContext를 사용, 생성 파라미터로 빈구성정보(MovieBuddyFactory.class)를 전달.
+        // -> 해당 빈 구성 정보를 이용해 스프링 컨테이너가 구성 되고,스프링 컨테이너를 통해 등록되어있는 빈을 getBean 메소드를 통해 취득해서 사용.
         final ApplicationContext applicationContext =
                 new AnnotationConfigApplicationContext(MovieBuddyFactory.class);
         final MovieFinder movieFinder = applicationContext.getBean(MovieFinder.class);
