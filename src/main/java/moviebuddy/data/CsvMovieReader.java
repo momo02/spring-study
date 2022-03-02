@@ -23,6 +23,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 // @Profile 어노테이션을 통해 어떤 프로파일일 때 활성화될 건지를 선언.
+// cf. JVM_option_설정 -Dspring.profiles.active=csv_mode
 @Profile(MovieBuddyProfile.CSV_MODE)
 @Repository
 public class CsvMovieReader extends AbstractFileSystemMovieReader implements MovieReader, InitializingBean, DisposableBean {

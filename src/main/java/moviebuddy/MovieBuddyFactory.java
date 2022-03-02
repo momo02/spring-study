@@ -1,10 +1,9 @@
 package moviebuddy;
 
-import moviebuddy.data.CsvMovieReader;
-import moviebuddy.data.XmlMovieReader;
-import org.springframework.context.annotation.*;
-import org.springframework.core.env.Environment;
-import org.springframework.oxm.Unmarshaller;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 /**
@@ -35,29 +34,5 @@ public class MovieBuddyFactory {
     @Configuration
     static class DataSourceModuleConfig {
 
-        private final Environment environment;
-
-        public DataSourceModuleConfig(Environment environment){
-            this.environment = environment;
-        }
-
-        @Profile(MovieBuddyProfile.CSV_MODE)
-        @Bean
-        public CsvMovieReader csvMovieReader() {
-            CsvMovieReader movieReader = new CsvMovieReader();
-            // 애플리케이션 외부에서 작성된 설정정보를 읽어, 메타데이터 위치 설정하기
-            // cf. 시스템의 OS나 JVM 아규먼트와 같은 설정 정보를 읽어 들이기 위해 System.getProperty() 메서드 사용.
-            //movieReader.setMetadata(System.getProperty("movie.metadata"));
-            movieReader.setMetadata(environment.getProperty("movie.metadata"));
-            return movieReader;
-        }
-
-        @Profile(MovieBuddyProfile.XML_MODE)
-        @Bean
-        public XmlMovieReader xmlMovieReader(Unmarshaller unmarshaller) {
-            XmlMovieReader movieReader = new XmlMovieReader(unmarshaller);
-            movieReader.setMetadata(environment.getProperty("movie.metadata"));
-            return movieReader;
-        }
     }
 }
