@@ -31,29 +31,7 @@ import java.util.stream.Collectors;
 // @Profile 어노테이션을 통해 어떤 프로파일일 때 활성화될 건지를 선언.
 @Profile(MovieBuddyProfile.CSV_MODE)
 @Repository
-public class CsvMovieReader implements MovieReader, InitializingBean, DisposableBean {
-
-    private final Logger log = LoggerFactory.getLogger(getClass());
-
-    private String metadata;
-
-    public String getMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(String metadata) /*throws FileNotFoundException, URISyntaxException*/ {
-//        // 읽어들일 메타데이터를 검증.
-//        URL metadataUrl = ClassLoader.getSystemResource(metadata);
-//        if(Objects.isNull(metadataUrl)){
-//            throw new FileNotFoundException(metadata);
-//        }
-//
-//        if( Files.isReadable(Path.of(metadataUrl.toURI())) == false){
-//            throw new ApplicationException(String.format("cannot read to metadata. [%s]", metadata));
-//        }
-
-        this.metadata = Objects.requireNonNull(metadata,"metadata is required value");
-    }
+public class CsvMovieReader extends AbstractFileSystemMovieReader implements MovieReader, InitializingBean, DisposableBean {
 
     /**
      * 영화 메타데이터를 읽어 저장된 영화 목록을 불러온다.
@@ -95,23 +73,4 @@ public class CsvMovieReader implements MovieReader, InitializingBean, Disposable
         }
     }
 
-    // 빈 생성 후(의존관계 주입이 완료된 후) 호출.
-    @PostConstruct
-    public void afterPropertiesSet() throws Exception {
-        // 읽어들일 메타데이터를 검증.
-        URL metadataUrl = ClassLoader.getSystemResource(metadata);
-        if(Objects.isNull(metadataUrl)){
-            throw new FileNotFoundException(metadata);
-        }
-
-        if( Files.isReadable(Path.of(metadataUrl.toURI())) == false){
-            throw new ApplicationException(String.format("cannot read to metadata. [%s]", metadata));
-        }
-    }
-
-    // 빈이 소멸되기 전 호출.
-    @PreDestroy
-    public void destroy() throws Exception {
-        log.info("Destoryed bean");
-    }
 }
