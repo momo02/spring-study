@@ -1,10 +1,11 @@
 package moviebuddy;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import moviebuddy.data.CsvMovieReader;
+import org.springframework.context.annotation.*;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+
+import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 
 /**
  * @Configuration 어노테이션을 붙임으로,
@@ -33,6 +34,12 @@ public class MovieBuddyFactory {
 
     @Configuration
     static class DataSourceModuleConfig {
-
+        @Profile(MovieBuddyProfile.CSV_MODE)
+        @Bean
+        public CsvMovieReader csvMovieReader() throws FileNotFoundException, URISyntaxException {
+            CsvMovieReader movieReader = new CsvMovieReader();
+            movieReader.setMetadata("movie_metadata.csv");
+            return movieReader;
+        }
     }
 }
