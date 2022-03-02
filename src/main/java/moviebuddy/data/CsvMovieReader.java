@@ -12,6 +12,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
@@ -93,8 +95,8 @@ public class CsvMovieReader implements MovieReader, InitializingBean, Disposable
         }
     }
 
-    // 빈이 초기화 될 때, metadata가 올바른 값인지 검증한다.
-    @Override
+    // 빈 생성 후(의존관계 주입이 완료된 후) 호출.
+    @PostConstruct
     public void afterPropertiesSet() throws Exception {
         // 읽어들일 메타데이터를 검증.
         URL metadataUrl = ClassLoader.getSystemResource(metadata);
@@ -107,7 +109,8 @@ public class CsvMovieReader implements MovieReader, InitializingBean, Disposable
         }
     }
 
-    @Override
+    // 빈이 소멸되기 전 호출.
+    @PreDestroy
     public void destroy() throws Exception {
         log.info("Destoryed bean");
     }
