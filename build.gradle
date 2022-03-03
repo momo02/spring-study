@@ -27,6 +27,9 @@ dependencies {
     // 자바 표준 어노테이션 관련 의존성 추가
     // cf. JSR 250으로 정의되어 있는 자바 표준 어노테이션을 사용해 빈 생명주기에 관여할 수 있다.
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
+
+    // 자바 생태계에는 캐시를 다루는 다양한 라이브러리들이 있는데, 그 중 하나인 caffeine 라이브러리를 사용. (자바 8을 기반으로 개발된 고성능 캐시 라이브러리)
+    implementation 'com.github.ben-manes.caffeine:caffeine:2.8.0'
 }
 
 java {

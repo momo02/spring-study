@@ -1,7 +1,14 @@
 package moviebuddy;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import moviebuddy.data.CsvMovieReader;
+import moviebuddy.domain.Movie;
 import org.springframework.context.annotation.*;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Configuration 어노테이션을 붙임으로,
@@ -31,6 +38,12 @@ public class MovieBuddyFactory {
 
     @Configuration
     static class DataSourceModuleConfig {
-
+        @Bean
+        public CsvMovieReader csvMovieReader() {
+            Cache<String, List<Movie>> cache = Caffeine.newBuilder()
+                                                .expireAfterWrite(3, TimeUnit.SECONDS)
+                                                .build(); //3초 유지
+            return new CsvMovieReader(cache);
+        }
     }
 }
