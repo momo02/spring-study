@@ -1,12 +1,13 @@
 package moviebuddy.data;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import moviebuddy.ApplicationException;
 import moviebuddy.MovieBuddyProfile;
 import moviebuddy.domain.Movie;
 import moviebuddy.domain.MovieReader;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
@@ -28,10 +29,10 @@ import java.util.stream.Collectors;
 @Repository
 public class CsvMovieReader extends AbstractMetadataResourceMovieReader implements MovieReader, InitializingBean, DisposableBean {
 
-    private final Cache<String, List<Movie>> cache;
+    private final CacheManager cacheManager;
 
-    public CsvMovieReader(Cache<String, List<Movie>> cache) {
-        this.cache = Objects.requireNonNull(cache);
+    public CsvMovieReader(CacheManager cacheManager) {
+        this.cacheManager = Objects.requireNonNull(cacheManager);
     }
 
     /**
@@ -40,8 +41,16 @@ public class CsvMovieReader extends AbstractMetadataResourceMovieReader implemen
      * @return 불러온 영화 목록
      */
     public List<Movie> loadMovies() {
+        /**
+         * 스프링 제공 캐시 추상화 인터페이스 사용
+         * -> 현재는 캐시 매니저로 카페인 구현체를 쓰고 있지만, 추후 다른 캐시 매니저로 유연하게 변경 가능.
+         *  (ex. 원격지의 인메모리 기반의 데이터그리드 기능을 가진 Redis로 변경한다고 하면, 레디스 캐시 매니저로 그냥 캐시 매니저 객체만 변경해주면 됨.)
+         * -> 즉 카페인을 이용한 캐시를 이용하다가 레디스를 이용한 캐시로 유연하게 변경 가능.
+         * ==> 이렇게 애플리케이션의 코드에 영향을 주지 않지 않고 얼마든지 변경할 수 있는 것이 바로 서비스 추상화의 힘!
+         */
         // 캐시에 저장된 데이커가 있다면, 즉시 반환한다.
-        List<Movie> movies = cache.getIfPresent("csv.movies");
+        Cache cache= cacheManager.getCache(/**캐시 이름*/getClass().getName());
+        List<Movie> movies = cache.get("csv.movies",List.class); // 꺼낼 때 어떤 타입의 값을 꺼낼 건지도 이렇게 지정을 해줄 수 있다.
         if(Objects.nonNull(movies) && movies.size() > 0){
             return movies;
         }

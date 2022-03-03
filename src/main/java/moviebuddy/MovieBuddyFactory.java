@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import moviebuddy.data.CsvMovieReader;
 import moviebuddy.domain.Movie;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.*;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
@@ -31,6 +32,14 @@ public class MovieBuddyFactory {
         return marshaller;
     }
 
+    @Bean
+    public CaffeineCacheManager caffeineCacheManager() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+        cacheManager.setCaffeine(Caffeine.newBuilder().expireAfterWrite(3, TimeUnit.SECONDS));
+
+        return cacheManager;
+    }
+
     @Configuration
     static class DomainModuleConfig {
 
@@ -38,12 +47,6 @@ public class MovieBuddyFactory {
 
     @Configuration
     static class DataSourceModuleConfig {
-        @Bean
-        public CsvMovieReader csvMovieReader() {
-            Cache<String, List<Movie>> cache = Caffeine.newBuilder()
-                                                .expireAfterWrite(3, TimeUnit.SECONDS)
-                                                .build(); //3초 유지
-            return new CsvMovieReader(cache);
-        }
+
     }
 }
