@@ -2,8 +2,11 @@ package moviebuddy;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import moviebuddy.data.CachingMovieReader;
 import moviebuddy.data.CsvMovieReader;
 import moviebuddy.domain.Movie;
+import moviebuddy.domain.MovieReader;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.*;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -47,6 +50,12 @@ public class MovieBuddyFactory {
 
     @Configuration
     static class DataSourceModuleConfig {
-
+        // cf. 의존 관계 주입 시 2개 이상의 동일한 타입의 빈이 존재할 때, 이 @Primary 어노테이션이 붙은 빈을 우선 사용.
+        // 변수명을 주입할 빈 이름과 동일하게 맞추는 방법, @Qualifier 어노테이션으로 구체적으로 주입할 빈의 이름이 뭔지 지정하는 방법 외에 또 다른 방법!
+        @Primary
+        @Bean
+        public MovieReader cachingMovieReader(CacheManager cacheManager, MovieReader target){
+            return new CachingMovieReader(cacheManager, target);
+        }
     }
 }
