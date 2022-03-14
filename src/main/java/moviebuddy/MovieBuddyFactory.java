@@ -7,11 +7,13 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.NameMatchMethodPointcut;
+import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.*;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
+import javax.cache.annotation.CacheResult;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,10 +48,13 @@ public class MovieBuddyFactory {
     // Advisor = PointCut(대상 선정 알고리즘) + Advice(부가기능)
     @Bean
     public Advisor cachingAdvisor(CacheManager cacheManager) {
-        // Pointcut : 특정 조건에 의해 필터링된 조인포인트, 수많은 조인포인트 중에 특정 메소드에서만 횡단 공통기능을 수행시키기 위해서 사용
-        // NameMatchMethodPointcut -> 메소드 이름 패턴을 이용해 조인 포인트를 선정하는 포인트컷을 작성
-        NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
-        pointcut.setMappedName("load*");
+        // Pointcut : 부가기능을 적용할 메소드(조인 포인트) 선정 알고리즘을 담은 객체.
+        // - NameMatchMethodPointcut : 대상 객체의 메소드 이름이 매치되면 조인 포인트로 선정하는 포인트컷.
+//        NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+//        pointcut.setMappedName("load*");
+
+        // - AnnotationMatchingPointcut : 대상 객체나 메소드에 특정 어노테이션이 선언되어 있으면 조인 포인트로 선정하는 포인트컷.
+        AnnotationMatchingPointcut pointcut = new AnnotationMatchingPointcut(null, CacheResult.class);
 
         Advice advice = new CachingAdvice(cacheManager);
 
@@ -60,6 +65,10 @@ public class MovieBuddyFactory {
      * cf. DefaultAdvisorAutoProxyCreator 는 BeanPostProcessor (빈 후처리기) interface 구현체.
      *  BeanPostProcessor 는 생성된 스프링 빈 객체를 후처리 할 수 있게 해준다.
      *  후처리한다는 것은 강제로 빈의 의존관게 변경 또는 프로퍼티를 통한 새로운 값 설정. 더 나아가 만들어진 빈을 대체할 수도 있다.
+     *  --> 자동 프락시 생성기는 빈 후처리기를 통해 스프링 컨테이너가 구성될 때 빈을 프락시로 대채한다.
+     * * 종류
+     *  - DefaultAdvisorAutoProxyCreator : 일반적으로 사용되는 자동 프락시 생성기로 스프링 컨테이너에 등록된 어드바이저 내의 포인트컷을 통해 프락시 적용 대상을 확인하고, 적용 대상이면 프락시 생성 후 어드바이저를 연결한다.
+     *  - BeanNameAutoProxyCreator : 빈의 이름으로 프락시 적용 대상을 판단하고, 이름이 매치되면 프락시 생성 후 내부에 등록된 어드바이스를 연결한다.
      */
     @Bean
     public DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator() {
@@ -70,37 +79,9 @@ public class MovieBuddyFactory {
 
     @Configuration
     static class DomainModuleConfig {
-
     }
 
     @Configuration
     static class DataSourceModuleConfig {
-
-        /**
-         * ProxyFactoryBean 의 한계
-         * - 부가 기능을 적용하기 위해 프락시를 생성하는 부분 -> 프락시를 빈으로 동록하는 코드를 필요한 만큼 수십,수백개 작성해야한다.
-         * - 어드바이스가 대상 객체가 가진 toString(), etClass() 등 모든 메서드에 부가 기능을 부여한다.
-         *
-         * @param applicationContext
-         * @return
-         */
-//        @Primary
-//        @Bean
-//        public ProxyFactoryBean cachingMovieReaderFactory(ApplicationContext applicationContext){
-//            MovieReader target = applicationContext.getBean(MovieReader.class);
-//            CacheManager cacheManager = applicationContext.getBean(CacheManager.class);
-//
-//            // 자바에는 JDK에서 제공하는 동적 프락시 외에도 프락시를 다룰 수 있는 다양한 기술이 존재. (ex. CGLIB, Javassist, Byte Buddy)
-//            // 스프링의 AOP 모듈은 이런 다양한 프락시 기술들을 일관된 방식으로 사용할 수 있도록 ProxyFactoryBean 이라는 서비스 추상화를 제공.
-//            // ProxyFactoryBean은 프락시를 생성해서 빈 객체를 등록해 주는 팩토리 빈.
-//            // JDK 동적 프락시와는 달리, 프락시 팩토리 빈은 순수하게 프락시를 생성하는 작업만 담당하고, 프락시를 통해 제공할 부가 기능은 별도 객체로 생성해 스프링 컨테이너에 빈으로 등록해 줄 수 있다.
-//            ProxyFactoryBean proxyFactoryBean = new ProxyFactoryBean();
-//            proxyFactoryBean.setTarget(target);
-//            // 클래스 프락시 활성화(true)/비활성화(false, 기본값)
-//            //proxyFactoryBean.setProxyTargetClass(true);
-//            proxyFactoryBean.addAdvice(new CachingAdvice(cacheManager));
-//
-//            return proxyFactoryBean;
-//        }
     }
 }
