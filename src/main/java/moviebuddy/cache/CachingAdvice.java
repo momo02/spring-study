@@ -2,6 +2,8 @@ package moviebuddy.cache;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
@@ -11,6 +13,8 @@ import java.util.Objects;
  * CachingAdvice는 순수하게 부가 기능에 관련된 로직(데이터 캐싱 기능)만 담겨 있어서 재사용하기에 용이.
  */
 public class CachingAdvice implements MethodInterceptor {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final CacheManager cacheManager;
 
@@ -28,12 +32,16 @@ public class CachingAdvice implements MethodInterceptor {
         // 호출된 메서드의 이름(여기선 loadMovies)을 key로 캐시에 데이터를 저장하거나 취득.
         Object cachedValue = cache.get(invocation.getMethod().getName(), Object.class);
         if(Objects.nonNull(cachedValue)){
+            log.info("returns cached data. [" + invocation + "]");
             return cachedValue;
         }
 
         // 캐시된 데이터가 없으면, 대상 객체에 명령을 위임하고, 반환된 값을 캐시에 저장 후 반환 처리
         cachedValue = invocation.proceed();
         cache.put(invocation.getMethod().getName(), cachedValue);
+
+        log.info("caching return value. [" + invocation + "]");
+
         return cachedValue;
     }
 }
