@@ -1,9 +1,11 @@
 package moviebuddy;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import moviebuddy.cache.CachingAspect;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurer;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.interceptor.*;
 import org.springframework.context.annotation.*;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
@@ -20,8 +22,11 @@ import java.util.concurrent.TimeUnit;
 // 패키지를 지정하지 않으면 @ComponentScan 이 선언된 클래스의 패키지 경로를 기준으로 탐색.
 @ComponentScan(basePackages = { "moviebuddy" })
 @Import({ MovieBuddyFactory.DomainModuleConfig.class, MovieBuddyFactory.DataSourceModuleConfig.class })
-@EnableAspectJAutoProxy // @AspectJ 지원을 활성화
-public class MovieBuddyFactory {
+@EnableCaching
+// CachingConfigurer interface is to be implemented by @Configuration classes annotated with @EnableCaching.
+// It provides various methods to configure or customize caching abstraction.
+// CachingConfigurer 인터페이스는 @EnableCaching 주석이 달린 @Configuration 클래스에 의해 구현된다. 캐싱 추상화를 구성하거나 사용자 정의하는 다양한 방법을 제공한다.
+public class MovieBuddyFactory implements CachingConfigurer {
 
     @Bean  // Jaxb2Marshaller : JAXB를 이용해 마샬링,언마샬링을 해주는 스프링의 OXM 모듈 구현체
     public Jaxb2Marshaller jaxb2Marshaller() {
@@ -39,9 +44,24 @@ public class MovieBuddyFactory {
         return cacheManager;
     }
 
-    @Bean
-    public CachingAspect cachingAspect(CacheManager cacheManager) {
-        return new CachingAspect(cacheManager);
+    @Override
+    public CacheManager cacheManager() {
+        return caffeineCacheManager();
+    }
+
+    @Override
+    public CacheResolver cacheResolver() {
+        return new SimpleCacheResolver(caffeineCacheManager());
+    }
+
+    @Override
+    public KeyGenerator keyGenerator() {
+        return new SimpleKeyGenerator();
+    }
+
+    @Override
+    public CacheErrorHandler errorHandler() {
+        return new SimpleCacheErrorHandler();
     }
 
     @Configuration
